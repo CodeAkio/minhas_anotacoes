@@ -21,6 +21,9 @@ class _HomePageState extends State<HomePage> {
 
     var anotacao = Anotacao(titulo, descricao, data);
     var id = await _db.salvarAnotacao(anotacao);
+
+    _controllerTitulo.clear();
+    _controllerDescricao.clear();
   }
 
   _exibirTelaCadastro(context) {
