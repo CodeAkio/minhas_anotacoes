@@ -1,39 +1,40 @@
-//@dart=2.9
 import 'package:minhas_anotacoes/model/anotacao.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class AnotacaoHelper {
   static final String nomeTabela = "anotacoes";
+  static final String colunaId = "id";
+  static final String colunaTitulo = "titulo";
+  static final String colunaDescricao = "descricao";
+  static final String colunaData = "data";
 
   static final AnotacaoHelper _anotacaoHelper = AnotacaoHelper._internal();
-  Database _db;
+  AnotacaoHelper._internal();
+
+  static Database? _db;
 
   factory AnotacaoHelper() {
     return _anotacaoHelper;
   }
 
-  AnotacaoHelper._internal() {}
-
   Future<Database> get db async {
-    if (_db != null) {
-      return _db;
-    } else {
-      _db = await inicializarDb();
-      return _db;
-    }
+    if (_db != null) return _db!;
+
+    _db = await _inicializarDb();
+    return _db!;
   }
 
-  _onCreate(Database db, int version) async {
+  Future _onCreate(Database db, int version) async {
     var sql = "CREATE TABLE $nomeTabela ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "titulo VARCHAR, "
-        "descricao TEXT, "
-        "data DATETIME)";
+        "$colunaId INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "$colunaTitulo VARCHAR, "
+        "$colunaDescricao TEXT, "
+        "$colunaData DATETIME)";
     await db.execute(sql);
   }
 
-  inicializarDb() async {
+  _inicializarDb() async {
     final caminhoBancoDados = await getDatabasesPath();
     final localBancoDados =
         join(caminhoBancoDados, "banco_minhas_anotacoes.db");
@@ -42,6 +43,20 @@ class AnotacaoHelper {
         await openDatabase(localBancoDados, version: 1, onCreate: _onCreate);
 
     return db;
+  }
+
+  Future<List<Anotacao>> recuperarAnotacoes() async {
+    var bancoDados = await db;
+    var sql = "SELECT * FROM $nomeTabela ORDER BY data DESC";
+    List<Map<String, dynamic>> anotacoesMap = await bancoDados.rawQuery(sql);
+
+    List<Anotacao> anotacoes = [];
+
+    for (var anotacaoMap in anotacoesMap) {
+      anotacoes.add(Anotacao.fromMap(anotacaoMap));
+    }
+
+    return anotacoes;
   }
 
   Future<int> salvarAnotacao(Anotacao anotacao) async {

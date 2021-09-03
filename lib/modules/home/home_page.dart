@@ -12,7 +12,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var _controllerTitulo = TextEditingController();
   var _controllerDescricao = TextEditingController();
+
+  List<Anotacao> _anotacoes = [];
+
   var _db = AnotacaoHelper();
+
+  _recuperarAnotacoes() async {
+    _anotacoes.clear();
+    var anotacoes = await _db.recuperarAnotacoes();
+
+    setState(() {
+      _anotacoes = anotacoes;
+    });
+  }
 
   _salvarAnotacao() async {
     var titulo = _controllerTitulo.text;
@@ -20,10 +32,12 @@ class _HomePageState extends State<HomePage> {
     var data = DateTime.now().toString();
 
     var anotacao = Anotacao(titulo, descricao, data);
-    var id = await _db.salvarAnotacao(anotacao);
+    await _db.salvarAnotacao(anotacao);
 
     _controllerTitulo.clear();
     _controllerDescricao.clear();
+
+    _recuperarAnotacoes();
   }
 
   _exibirTelaCadastro(context) {
@@ -65,6 +79,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _recuperarAnotacoes();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -79,7 +99,23 @@ class _HomePageState extends State<HomePage> {
           _exibirTelaCadastro(context);
         },
       ),
-      body: Container(),
+      body: Column(
+        children: [
+          Expanded(
+              child: ListView.builder(
+                  itemCount: _anotacoes.length,
+                  itemBuilder: (context, index) {
+                    final anotacao = _anotacoes[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(anotacao.titulo),
+                        subtitle:
+                            Text("${anotacao.data} - ${anotacao.descricao}"),
+                      ),
+                    );
+                  }))
+        ],
+      ),
     );
   }
 }
