@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:minhas_anotacoes/helper/anotacao_helper.dart';
 import 'package:minhas_anotacoes/model/anotacao.dart';
 
@@ -38,6 +41,17 @@ class _HomePageState extends State<HomePage> {
     _controllerDescricao.clear();
 
     _recuperarAnotacoes();
+  }
+
+  _formataData(String data) {
+    initializeDateFormatting('pt_BR');
+
+    var formatador = DateFormat.yMd('pt_BR');
+
+    var dataConvertida = DateTime.parse(data);
+    var dataFormatada = formatador.format(dataConvertida);
+
+    return dataFormatada;
   }
 
   _exibirTelaCadastro(context) {
@@ -109,8 +123,8 @@ class _HomePageState extends State<HomePage> {
                     return Card(
                       child: ListTile(
                         title: Text(anotacao.titulo),
-                        subtitle:
-                            Text("${anotacao.data} - ${anotacao.descricao}"),
+                        subtitle: Text(
+                            "${_formataData(anotacao.data)} - ${anotacao.descricao}"),
                       ),
                     );
                   }))
