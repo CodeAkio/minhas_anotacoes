@@ -43,4 +43,11 @@ class AnotacaoHelper {
 
     return db;
   }
+
+  Future<int> salvarAnotacao(Anotacao anotacao) async {
+    var bancoDados = await db;
+    var id = await bancoDados.insert(nomeTabela, anotacao.toMap());
+
+    return id;
+  }
 }
