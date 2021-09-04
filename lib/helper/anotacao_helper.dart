@@ -47,6 +47,7 @@ class AnotacaoHelper {
 
   Future<List<Anotacao>> recuperarAnotacoes() async {
     var bancoDados = await db;
+
     var sql = "SELECT * FROM $nomeTabela ORDER BY data DESC";
     List<Map<String, dynamic>> anotacoesMap = await bancoDados.rawQuery(sql);
 
@@ -61,6 +62,7 @@ class AnotacaoHelper {
 
   Future<int> salvarAnotacao(Anotacao anotacao) async {
     var bancoDados = await db;
+
     var id = await bancoDados.insert(nomeTabela, anotacao.toMap());
 
     return id;
@@ -68,7 +70,15 @@ class AnotacaoHelper {
 
   Future<int> atualizarAnotacao(Anotacao anotacao) async {
     var bancoDados = await db;
+
     return await bancoDados.update(nomeTabela, anotacao.toMap(),
         where: "id = ?", whereArgs: [anotacao.id]);
+  }
+
+  Future<int> removerAnotacao(int id) async {
+    var bancoDados = await db;
+
+    return await bancoDados
+        .delete(nomeTabela, where: "id = ?", whereArgs: [id]);
   }
 }

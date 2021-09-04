@@ -6,7 +6,7 @@ class Anotacao {
   String descricao;
   String data;
 
-  Anotacao(this.titulo, this.descricao, this.data) {}
+  Anotacao(this.titulo, this.descricao, this.data);
 
   Anotacao.fromMap(Map<String, dynamic> map)
       : this.id = map[AnotacaoHelper.colunaId],

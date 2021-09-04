@@ -51,6 +51,12 @@ class _HomePageState extends State<HomePage> {
     _recuperarAnotacoes();
   }
 
+  _removerAnotacao(int id) async {
+    await _db.removerAnotacao(id);
+
+    _recuperarAnotacoes();
+  }
+
   _formataData(String data) {
     initializeDateFormatting('pt_BR');
 
@@ -161,7 +167,9 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                _removerAnotacao(anotacao.id!);
+                              },
                               child: Icon(
                                 Icons.highlight_remove,
                                 color: Colors.red,
