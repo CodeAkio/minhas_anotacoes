@@ -29,13 +29,21 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _salvarAnotacao() async {
+  _salvarAtualizarAnotacao({Anotacao? anotacao}) async {
     var titulo = _controllerTitulo.text;
     var descricao = _controllerDescricao.text;
     var data = DateTime.now().toString();
 
-    var anotacao = Anotacao(titulo, descricao, data);
-    await _db.salvarAnotacao(anotacao);
+    if (anotacao == null) {
+      var novaAnotacao = Anotacao(titulo, descricao, data);
+      await _db.salvarAnotacao(novaAnotacao);
+    } else {
+      anotacao.titulo = titulo;
+      anotacao.descricao = descricao;
+      anotacao.data = data;
+
+      await _db.atualizarAnotacao(anotacao);
+    }
 
     _controllerTitulo.clear();
     _controllerDescricao.clear();
@@ -54,12 +62,24 @@ class _HomePageState extends State<HomePage> {
     return dataFormatada;
   }
 
-  _exibirTelaCadastro(context) {
+  _exibirTelaCadastro({Anotacao? anotacao}) {
+    var textoSalvarAtualizar = "";
+
+    if (anotacao == null) {
+      _controllerTitulo.text = "";
+      _controllerDescricao.text = "";
+      textoSalvarAtualizar = "Salvar";
+    } else {
+      _controllerTitulo.text = anotacao.titulo;
+      _controllerDescricao.text = anotacao.descricao;
+      textoSalvarAtualizar = "Atualizar";
+    }
+
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text("Adicionar Anotação"),
+            title: Text("$textoSalvarAtualizar Anotação"),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -83,10 +103,10 @@ class _HomePageState extends State<HomePage> {
                   child: Text("Cancelar")),
               ElevatedButton(
                   onPressed: () {
-                    _salvarAnotacao();
+                    _salvarAtualizarAnotacao(anotacao: anotacao);
                     Navigator.pop(context);
                   },
-                  child: Text("Salvar")),
+                  child: Text(textoSalvarAtualizar)),
             ],
           );
         });
@@ -110,7 +130,7 @@ class _HomePageState extends State<HomePage> {
         foregroundColor: Colors.white,
         child: Icon(Icons.add),
         onPressed: () {
-          _exibirTelaCadastro(context);
+          _exibirTelaCadastro();
         },
       ),
       body: Column(
@@ -125,6 +145,30 @@ class _HomePageState extends State<HomePage> {
                         title: Text(anotacao.titulo),
                         subtitle: Text(
                             "${_formataData(anotacao.data)} - ${anotacao.descricao}"),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _exibirTelaCadastro(anotacao: anotacao);
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 16),
+                                child: Icon(
+                                  Icons.edit,
+                                  color: Colors.orangeAccent,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              child: Icon(
+                                Icons.highlight_remove,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }))
